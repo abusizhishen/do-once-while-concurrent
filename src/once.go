@@ -1,4 +1,4 @@
-package justOnceWhileCocurrent
+package src
 
 import (
 	"log"
@@ -20,7 +20,7 @@ func (u *JustOnceSameTime)Req(key interface{}) bool {
 
 	_,ok := u.Map[key]
 	if ok{
-		//log.Println("没有得到锁，等待执行者请求结束")
+		//log.Println("没有得到锁，等待执行者执行结束")
 		return false
 	}
 
