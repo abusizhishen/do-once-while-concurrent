@@ -3,4 +3,4 @@
 
 根据请求标识，对同一时刻重复请求同一资源的多个请求做限制，只有一个请求等获得执行权限，其他请求均处于阻塞状态，直到获得执行权限的线程执行结束，释放信号。此时所有请求均能得到数据。
 
-[img](https://github.com/abusizhishen/justOnceWhileCocurrent/blob/master/example.jpg?raw=true)
+![img](https://github.com/abusizhishen/justOnceWhileCocurrent/blob/master/example.jpg?raw=true)
