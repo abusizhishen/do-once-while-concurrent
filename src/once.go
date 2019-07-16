@@ -40,26 +40,17 @@ func (u *JustOnceSameTime) Req(RequestTag interface{}) bool {
 调用wait方法将处于阻塞状态，直到获得执行权限的线程处理完具体的业务逻辑，调用release方法来通知其他线程资源ok了
 */
 func (u *JustOnceSameTime) Wait(RequestTag interface{}) {
-	for {
-		u.Lock.RLock()
-		_, ok := u.Map[RequestTag]
-		if !ok {
-			log.Println("等待结束：", RequestTag)
-			u.Lock.RUnlock()
-			return
-		}
-		select {
-		case _, ok := <-u.Map[RequestTag]:
-			if !ok {
-				log.Println("等待结束：", RequestTag)
-				u.Lock.RUnlock()
-				return
-			} else {
-				log.Println(ok)
-			}
-		default:
-		}
-		u.Lock.RUnlock()
+	u.Lock.RLock()
+	_, ok := u.Map[RequestTag]
+	u.Lock.RUnlock()
+	if !ok {
+		log.Println("等待结束：", RequestTag)
+		return
+	}
+	select {
+	case <-u.Map[RequestTag]:
+		log.Println("等待结束：", RequestTag)
+		return
 	}
 }
 
