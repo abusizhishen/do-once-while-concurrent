@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/abusizhishen/justOnceWhileCocurrent/src"
-	"github.com/pkg/errors"
+	"errors"
 	"log"
 	"sync"
 	"time"
