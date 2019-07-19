@@ -41,14 +41,14 @@ func (u *JustOnceSameTime) Req(RequestTag interface{}) bool {
 */
 func (u *JustOnceSameTime) Wait(RequestTag interface{}) {
 	u.Lock.RLock()
-	_, ok := u.Map[RequestTag]
+	c, ok := u.Map[RequestTag]
 	u.Lock.RUnlock()
 	if !ok {
 		log.Println("等待结束：", RequestTag)
 		return
 	}
 	select {
-	case <-u.Map[RequestTag]:
+	case <-c:
 		log.Println("等待结束：", RequestTag)
 		return
 	}
