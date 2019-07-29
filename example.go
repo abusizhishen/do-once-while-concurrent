@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"github.com/abusizhishen/justOnceWhileCocurrent/src"
 	"errors"
-	"log"
+	"fmt"
+	"github.com/abusizhishen/doOnceWhileConcurrent/src"
 	"sync"
 	"time"
 )
@@ -52,14 +51,14 @@ func getUserInfo(userId int) (user UserInfo, err error) {
 	time.Sleep(time.Second * 3)
 
 	//redis读取用户信息
-	log.Println("redis读取用户信息:", userId)
+	fmt.Println("redis读取用户信息:", userId)
 	user, err = getUserInfoFromRedis(userId)
 	if err != nil {
 		return
 	}
 
 	//用户写入缓存
-	log.Println("用户写入缓存:",userId)
+	fmt.Println("用户写入缓存:",userId)
 	userCache.setUser(user)
 	return
 }
