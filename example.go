@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/abusizhishen/doOnceWhileConcurrent/src"
+	"github.com/oopendoor/doOnce/src"
 	"sync"
 	"time"
 )
@@ -17,7 +17,7 @@ func main() {
 	time.Sleep(time.Second*5)
 }
 
-var once src.JustOnceSameTime
+var once src.DoOnce
 
 func doSomeThing() {
 	var userId = 12345

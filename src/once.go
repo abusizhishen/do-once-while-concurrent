@@ -1,12 +1,11 @@
 package src
 
 import (
-	"log"
 	"sync"
 )
 
-type JustOnceSameTime struct {
-	Lock sync.RWMutex
+type DoOnce struct {
+	sync.RWMutex
 	Map  map[interface{}]chan bool
 }
 
@@ -16,9 +15,9 @@ RequestTag 请求标识 用于标识同一个资源
 完成后调用release方法通知其他线程，操作已完成，获取资源即可
 其他请求接下来需要调用wait方法
 */
-func (u *JustOnceSameTime) Req(RequestTag interface{}) bool {
-	u.Lock.Lock()
-	defer u.Lock.Unlock()
+func (u *DoOnce) Req(RequestTag interface{}) bool {
+	u.Lock()
+	defer u.Unlock()
 
 	if u.Map == nil {
 		u.Map = make(map[interface{}]chan bool)
@@ -26,12 +25,12 @@ func (u *JustOnceSameTime) Req(RequestTag interface{}) bool {
 
 	_, ok := u.Map[RequestTag]
 	if ok {
-		log.Println("没有得到锁，等待执行者执行结束")
+		//log.Println("没有得到锁，等待执行者执行结束")
 		return false
 	}
 
 	u.Map[RequestTag] = make(chan bool, 1)
-	log.Println("获取锁:", RequestTag)
+	//log.Println("获取锁:", RequestTag)
 
 	return true
 }
@@ -39,17 +38,17 @@ func (u *JustOnceSameTime) Req(RequestTag interface{}) bool {
 /*RequestTag 请求标识 用于标识同一个资源
 调用wait方法将处于阻塞状态，直到获得执行权限的线程处理完具体的业务逻辑，调用release方法来通知其他线程资源ok了
 */
-func (u *JustOnceSameTime) Wait(RequestTag interface{}) {
-	u.Lock.RLock()
+func (u *DoOnce) Wait(RequestTag interface{}) {
+	u.RLock()
 	c, ok := u.Map[RequestTag]
-	u.Lock.RUnlock()
+	u.RUnlock()
 	if !ok {
-		log.Println("等待结束：", RequestTag)
+		//log.Println("等待结束：", RequestTag)
 		return
 	}
 	select {
 	case <-c:
-		log.Println("等待结束：", RequestTag)
+		//log.Println("等待结束：", RequestTag)
 		return
 	}
 }
@@ -57,15 +56,15 @@ func (u *JustOnceSameTime) Wait(RequestTag interface{}) {
 /*RequestTag 请求标识 用于标识同一个资源
 获得执行权限的线程需要在执行完业务逻辑后调用该方法通知其他处于阻塞状态的线程
 */
-func (u *JustOnceSameTime) Release(RequestTag interface{}) {
-	u.Lock.Lock()
+func (u *DoOnce) Release(RequestTag interface{}) {
+	u.Lock()
 	if _, ok := u.Map[RequestTag]; !ok {
-		log.Println("锁已释放？还是不存在？RequestTag用错？RequestTag: ", RequestTag)
-		u.Lock.Unlock()
+		//log.Println("锁已释放？还是不存在？RequestTag用错？RequestTag: ", RequestTag)
+		u.Unlock()
 		return
 	}
 	close(u.Map[RequestTag])
 	delete(u.Map, RequestTag)
-	u.Lock.Unlock()
-	log.Println("释放锁:", RequestTag)
+	u.Lock()
+	//log.Println("释放锁:", RequestTag)
 }
