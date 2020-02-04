@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/oopendoor/doOnce/src"
+	"github.com/abusizhishen/doOnceSameTime/src"
 	"sync"
 	"time"
 )
@@ -39,7 +39,7 @@ func getUserInfo(userId int) (user UserInfo, err error) {
 	if !once.Req(requestTag) {
 		fmt.Println("没抢到锁，等待抢到锁的线程执行结束。。。")
 		once.Wait(requestTag)
-		fmt.Println("等待结束:", keyUser)
+		fmt.Println("等待结束:", requestTag)
 		return userCache.GetUser(userId)
 	}
 
@@ -73,8 +73,6 @@ type UserInfo struct {
 	Id     int
 	Name   string
 	Age    int
-	Gender int
-	Img    string
 }
 
 var userCache UserCache
@@ -108,7 +106,7 @@ func getUserInfoFromRedis(id int) (user UserInfo, err error) {
 
 	user = UserInfo{
 		Id:   12345,
-		Name: "someone",
+		Name: "abusizhishen",
 		Age:  18,
 	}
 	return
