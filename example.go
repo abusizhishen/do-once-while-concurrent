@@ -4,17 +4,18 @@ import (
 	"errors"
 	"fmt"
 	"github.com/abusizhishen/do-once-while-concurrent/src"
+	"log"
 	"sync"
 	"time"
 )
 
 func main() {
-	for i := 0; i < 10; i++ {
-		//并发do something
+	//并发do something
+	for i := 0; i < 5; i++ {
 		go doSomeThing()
 	}
 
-	time.Sleep(time.Second*5)
+	time.Sleep(time.Second * 5)
 }
 
 var once src.DoOnce
@@ -35,30 +36,31 @@ func getUserInfo(userId int) (user UserInfo, err error) {
 		return
 	}
 
+	log.Println(err)
 	var requestTag = fmt.Sprintf(keyUser, userId)
 	if !once.Req(requestTag) {
-		fmt.Println("没抢到锁，等待抢到锁的线程执行结束。。。")
+		log.Println("没抢到锁，等待抢到锁的线程执行结束。。。")
 		once.Wait(requestTag)
-		fmt.Println("等待结束:", requestTag)
+		log.Println("等待结束:", requestTag)
 		return userCache.GetUser(userId)
 	}
 
 	//得到资源后释放锁
 	defer once.Release(requestTag)
-	fmt.Println(requestTag, "获得锁，let's Go")
+	log.Println(requestTag, "获得锁，let's Go")
 
 	//为演示效果，sleep
 	time.Sleep(time.Second * 3)
 
 	//redis读取用户信息
-	fmt.Println("redis读取用户信息:", userId)
+	log.Println("redis读取用户信息:", userId)
 	user, err = getUserInfoFromRedis(userId)
 	if err != nil {
 		return
 	}
 
 	//用户写入缓存
-	fmt.Println("用户写入缓存:",userId)
+	log.Println("用户写入缓存:", userId)
 	userCache.setUser(user)
 	return
 }
@@ -70,9 +72,9 @@ type UserCache struct {
 }
 
 type UserInfo struct {
-	Id     int
-	Name   string
-	Age    int
+	Id   int
+	Name string
+	Age  int
 }
 
 var userCache UserCache
@@ -80,30 +82,28 @@ var errUserNotFound = errors.New("user not found in cache")
 
 func (c *UserCache) GetUser(id int) (user UserInfo, err error) {
 	c.RLock()
+	defer c.RUnlock()
 	var ok bool
 	user, ok = userCache.Users[id]
 	if ok {
 		return
 	}
 
-	c.RUnlock()
 	return user, errUserNotFound
 }
 
 func (c *UserCache) setUser(user UserInfo) {
 	c.Lock()
+	defer c.Unlock()
 	if c.Users == nil {
 		c.Users = make(map[int]UserInfo)
 	}
 
 	c.Users[user.Id] = user
-	c.Unlock()
 	return
 }
 
 func getUserInfoFromRedis(id int) (user UserInfo, err error) {
-	// ...
-
 	user = UserInfo{
 		Id:   12345,
 		Name: "abusizhishen",
