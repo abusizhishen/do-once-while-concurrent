@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/abusizhishen/doOnceSameTime/src"
+	"github.com/abusizhishen/do-once-while-concurrent/src"
 	"sync"
 	"time"
 )
