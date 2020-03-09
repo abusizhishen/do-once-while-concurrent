@@ -60,13 +60,12 @@ func (u *DoOnce) Wait(RequestTag interface{}) {
 */
 func (u *DoOnce) Release(RequestTag interface{}) {
 	u.lock.Lock()
+	defer u.lock.Unlock()
 	if _, ok := u.data[RequestTag]; !ok {
 		//log.Println("锁已释放？还是不存在？RequestTag用错？RequestTag: ", RequestTag)
-		u.lock.Unlock()
 		return
 	}
 	close(u.data[RequestTag])
 	delete(u.data, RequestTag)
-	u.lock.Lock()
 	//log.Println("释放锁:", RequestTag)
 }
