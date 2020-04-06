@@ -9,7 +9,7 @@ type DoOnce struct {
 	data Map
 }
 
-type Map map[interface{}]chan struct{}
+type Map map[interface{}]*sync.WaitGroup
 
 /*
 RequestTag 请求标识 用于标识同一个资源
@@ -31,7 +31,9 @@ func (u *DoOnce) Req(RequestTag interface{}) bool {
 		return false
 	}
 
-	u.data[RequestTag] = make(chan struct{})
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	u.data[RequestTag] = wg
 	//log.Println("获取锁:", RequestTag)
 
 	return true
@@ -42,17 +44,16 @@ func (u *DoOnce) Req(RequestTag interface{}) bool {
 */
 func (u *DoOnce) Wait(RequestTag interface{}) {
 	u.lock.RLock()
-	c, ok := u.data[RequestTag]
+	w, ok := u.data[RequestTag]
 	u.lock.RUnlock()
 	if !ok {
 		//log.Println("等待结束：", RequestTag)
 		return
 	}
-	select {
-	case <-c:
-		//log.Println("等待结束：", RequestTag)
-		return
-	}
+
+	w.Wait()
+	//log.Println("等待结束：", RequestTag)
+	return
 }
 
 /*RequestTag 请求标识 用于标识同一个资源
@@ -65,7 +66,7 @@ func (u *DoOnce) Release(RequestTag interface{}) {
 		//log.Println("锁已释放？还是不存在？RequestTag用错？RequestTag: ", RequestTag)
 		return
 	}
-	close(u.data[RequestTag])
+	u.data[RequestTag].Done()
 	delete(u.data, RequestTag)
 	//log.Println("释放锁:", RequestTag)
 }
