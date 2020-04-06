@@ -20,6 +20,7 @@ func main() {
 
 var once src.DoOnce
 
+//模拟获取用户信息
 func doSomeThing() {
 	var userId = 12345
 	var user, err = getUserInfo(userId)
