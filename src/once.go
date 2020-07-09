@@ -6,10 +6,17 @@ import (
 
 type DoOnce struct {
 	lock sync.RWMutex
-	data Map
+	data data
 }
 
-type Map map[interface{}]*sync.WaitGroup
+type data map[interface{}]*sync.WaitGroup
+
+func New() *DoOnce {
+	return &DoOnce{
+		lock: sync.RWMutex{},
+		data: make(data),
+	}
+}
 
 /*
 RequestTag 请求标识 用于标识同一个资源
@@ -22,7 +29,7 @@ func (u *DoOnce) Req(RequestTag interface{}) bool {
 	defer u.lock.Unlock()
 
 	if u.data == nil {
-		u.data = make(Map)
+		u.data = make(data)
 	}
 
 	_, ok := u.data[RequestTag]
