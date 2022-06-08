@@ -8,5 +8,5 @@
 
 
 刚发现一位大佬写的，[go-singleflight](https://github.com/yangchenxing/go-singleflight)
-和我的思路是一样的，用waitgroup实现的通知更好，chan相对麻烦还容易出错
-如果没有本地缓存，大佬的更通用，使用更简单；我写的支持更多的自定义操作
+思路是一样的，用waitgroup实现的通知更好，chan相对麻烦还容易出错
+建议使用大佬的
